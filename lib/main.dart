@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,13 +30,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> buttonNames = [];
   String textToDisplay = '';
-  String result = '';
-  String operation = '';
-  int firstNum = 0;
-  int secondNum = 0;
-  String history = '';
 
   List<Map<String, dynamic>> buttons = [
     {'name': '1', 'color': Colors.brown},
@@ -56,74 +51,33 @@ class _MyHomePageState extends State<MyHomePage> {
     {'name': '/', 'color': Colors.orange},
   ];
 
-  String calculate() {
-    try {
-      String expression = buttonNames.join('');
-      return _evaluateExpression(expression).toString();
-    } catch (e) {
+  String calculate(String expression) {
+  try {
+    if (expression.contains('/0')) {
       return 'Error';
     }
-  }
-
-  double _evaluateExpression(String expression) {
-    if (expression.contains('+')) {
-      var parts = expression.split('+');
-      return double.parse(parts[0]) + double.parse(parts[1]);
-    } else if (expression.contains('-')) {
-      var parts = expression.split('-');
-      return double.parse(parts[0]) - double.parse(parts[1]);
-    } else if (expression.contains('*')) {
-      var parts = expression.split('*');
-      return double.parse(parts[0]) * double.parse(parts[1]);
-    } else if (expression.contains('/')) {
-      var parts = expression.split('/');
-      return double.parse(parts[0]) / double.parse(parts[1]);
-    } else {
-      return double.parse(expression);
+    Parser p = Parser();
+    Expression exp = p.parse(expression);
+    ContextModel cm = ContextModel();
+    double eval = exp.evaluate(EvaluationType.REAL, cm);
+    if (eval.isInfinite || eval.isNaN) {
+      return 'Error';
     }
+    return eval.toString();
+  } catch (e) {
+    return 'Error';
   }
-  
+}
+
+
   void buttonClick(String buttonText) {
     setState(() {
       if (buttonText == 'C') {
-        // Clear everything
         textToDisplay = '';
-        firstNum = 0;
-        secondNum = 0;
-        operation = '';
-        result = '';
-        history = ''; // Clear history
       } else if (buttonText == '=') {
-        // Perform the calculation if there's a valid first number and operation
-        if (firstNum != 0 && textToDisplay.isNotEmpty && double.tryParse(textToDisplay) != null) {
-          secondNum = int.parse(textToDisplay);
-          if (operation == '+') {
-            result = (firstNum + secondNum).toString();
-          } else if (operation == '-') {
-            result = (firstNum - secondNum).toString();
-          } else if (operation == '*') {
-            result = (firstNum * secondNum).toString();
-          } else if (operation == '/') {
-            if (secondNum != 0) {
-              result = (firstNum / secondNum).toString();
-            } else {
-              result = 'Error'; // Handling division by zero
-            }
-          }
-          // Store the calculation in history
-          history += '$firstNum $operation $secondNum = $result\n';
-          textToDisplay = result;
-          operation = ''; // Clear the operator after calculation
-        }
-      } else if (buttonText == '+' || buttonText == '-' || buttonText == '*' || buttonText == '/') {
-        // Store the first operand and operator only if there's a valid number
-        if (textToDisplay.isNotEmpty && double.tryParse(textToDisplay) != null) {
-          firstNum = int.parse(textToDisplay);
-          operation = buttonText;
-          textToDisplay = ''; // Clear display to prepare for second number
-        }
+        String result = calculate(textToDisplay);
+        textToDisplay = result;
       } else {
-        // Add number or decimal to the display
         textToDisplay += buttonText;
       }
     });
@@ -131,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void clearScreen() {
     setState(() {
-      buttonNames.clear();
+      textToDisplay = '';
     });
   }
 
@@ -148,15 +102,10 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Display Button Names
               Text(
-                buttonNames.isEmpty
-                    ? 'Press a button'
-                    : buttonNames.join(''),
+                textToDisplay.isEmpty ? 'Press a button' : textToDisplay,
                 style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
               ),
-
-              // Grid of Buttons
               const SizedBox(height: 20),
               SizedBox(
                 width: 500,
@@ -171,17 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: buttons.length,
                   itemBuilder: (context, index) {
                     return InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (buttons[index]['name'] == '=') {
-                            // Perform calculation
-                            buttonNames = [calculate()];
-                          } else {
-                            // Add the button name to the list
-                            buttonNames.add(buttons[index]['name']);
-                          }
-                        });
-                      },
+                      onTap: () => buttonClick(buttons[index]['name']),
                       child: Container(
                         decoration: BoxDecoration(
                           color: buttons[index]['color'],
@@ -202,8 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
-
-              // Clear Button
               const SizedBox(height: 20),
               InkWell(
                 onTap: clearScreen,
