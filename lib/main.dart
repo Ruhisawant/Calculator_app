@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -31,25 +30,57 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<String> buttonNames = [];
+  String textToDisplay = '';
+  String result = '';
+  String operation = '';
+  int firstNum = 0;
+  int secondNum = 0;
 
   List<Map<String, dynamic>> buttons = [
-    {'name': '1', 'function': () {}, 'color': Colors.brown},
-    {'name': '2', 'function': () {}, 'color': Colors.brown},
-    {'name': '3', 'function': () {}, 'color': Colors.brown},
-    {'name': '+', 'function': () {}, 'color': Colors.orange},
-    {'name': '4', 'function': () {}, 'color': Colors.brown},
-    {'name': '5', 'function': () {}, 'color': Colors.brown},
-    {'name': '6', 'function': () {}, 'color': Colors.brown},
-    {'name': '-', 'function': () {}, 'color': Colors.orange},
-    {'name': '7', 'function': () {}, 'color': Colors.brown},
-    {'name': '8', 'function': () {}, 'color': Colors.brown},
-    {'name': '9', 'function': () {}, 'color': Colors.brown},
-    {'name': '*', 'function': () {}, 'color': Colors.orange},
-    {'name': '.', 'function': () {}, 'color': Colors.brown},
-    {'name': '0', 'function': () {}, 'color': Colors.brown},
-    {'name': '=', 'function': () {}, 'color': Colors.brown},
-    {'name': '/', 'function': () {}, 'color': Colors.orange},
+    {'name': '1', 'color': Colors.brown},
+    {'name': '2', 'color': Colors.brown},
+    {'name': '3', 'color': Colors.brown},
+    {'name': '+', 'color': Colors.orange},
+    {'name': '4', 'color': Colors.brown},
+    {'name': '5', 'color': Colors.brown},
+    {'name': '6', 'color': Colors.brown},
+    {'name': '-', 'color': Colors.orange},
+    {'name': '7', 'color': Colors.brown},
+    {'name': '8', 'color': Colors.brown},
+    {'name': '9', 'color': Colors.brown},
+    {'name': '*', 'color': Colors.orange},
+    {'name': '.', 'color': Colors.brown},
+    {'name': '0', 'color': Colors.brown},
+    {'name': '=', 'color': Colors.brown},
+    {'name': '/', 'color': Colors.orange},
   ];
+
+  String calculate() {
+    try {
+      String expression = buttonNames.join('');
+      return _evaluateExpression(expression).toString();
+    } catch (e) {
+      return 'Error';
+    }
+  }
+
+  double _evaluateExpression(String expression) {
+    if (expression.contains('+')) {
+      var parts = expression.split('+');
+      return double.parse(parts[0]) + double.parse(parts[1]);
+    } else if (expression.contains('-')) {
+      var parts = expression.split('-');
+      return double.parse(parts[0]) - double.parse(parts[1]);
+    } else if (expression.contains('*')) {
+      var parts = expression.split('*');
+      return double.parse(parts[0]) * double.parse(parts[1]);
+    } else if (expression.contains('/')) {
+      var parts = expression.split('/');
+      return double.parse(parts[0]) / double.parse(parts[1]);
+    } else {
+      return double.parse(expression);
+    }
+  }
 
   void clearScreen() {
     setState(() {
@@ -70,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Display the list of button names, one on each line
+              // Display Button Names
               Text(
                 buttonNames.isEmpty
                     ? 'Press a button'
@@ -78,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
               ),
 
-              // Grid of buttons
+              // Grid of Buttons
               const SizedBox(height: 20),
               SizedBox(
                 width: 500,
@@ -95,8 +126,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     return InkWell(
                       onTap: () {
                         setState(() {
-                          buttonNames.add(buttons[index]['name']);
-                          buttons[index]['function']();
+                          if (buttons[index]['name'] == '=') {
+                            // Perform calculation
+                            buttonNames = [calculate()];
+                          } else {
+                            // Add the button name to the list
+                            buttonNames.add(buttons[index]['name']);
+                          }
                         });
                       },
                       child: Container(
