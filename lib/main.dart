@@ -41,8 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: SizedBox(
-            width: 300,
-            height: 300,
+            width: 500,
+            height: 500,
             child: GridView.builder(
               shrinkWrap: true,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -52,16 +52,25 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               itemCount: 16,
               itemBuilder: (context, index) {
-                return ElevatedButton(
-                  onPressed: () {
-                    Text('Btn $index pressed');
+                return InkWell(
+                  onTap: () {
+                    Text('Bt $index pressed');
                   },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(50, 50),
-                  ),
-                  child: Text(
-                    'Btn $index',
-                    style: const TextStyle(fontSize: 12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.brown,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    height: 80,
+                    width: 80,
+                    child: Text(
+                      'Btn $index',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 );
               },
