@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String operation = '';
   int firstNum = 0;
   int secondNum = 0;
+  String history = '';
 
   List<Map<String, dynamic>> buttons = [
     {'name': '1', 'color': Colors.brown},
@@ -80,6 +81,52 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       return double.parse(expression);
     }
+  }
+  
+  void buttonClick(String buttonText) {
+    setState(() {
+      if (buttonText == 'C') {
+        // Clear everything
+        textToDisplay = '';
+        firstNum = 0;
+        secondNum = 0;
+        operation = '';
+        result = '';
+        history = ''; // Clear history
+      } else if (buttonText == '=') {
+        // Perform the calculation if there's a valid first number and operation
+        if (firstNum != 0 && textToDisplay.isNotEmpty && double.tryParse(textToDisplay) != null) {
+          secondNum = int.parse(textToDisplay);
+          if (operation == '+') {
+            result = (firstNum + secondNum).toString();
+          } else if (operation == '-') {
+            result = (firstNum - secondNum).toString();
+          } else if (operation == '*') {
+            result = (firstNum * secondNum).toString();
+          } else if (operation == '/') {
+            if (secondNum != 0) {
+              result = (firstNum / secondNum).toString();
+            } else {
+              result = 'Error'; // Handling division by zero
+            }
+          }
+          // Store the calculation in history
+          history += '$firstNum $operation $secondNum = $result\n';
+          textToDisplay = result;
+          operation = ''; // Clear the operator after calculation
+        }
+      } else if (buttonText == '+' || buttonText == '-' || buttonText == '*' || buttonText == '/') {
+        // Store the first operand and operator only if there's a valid number
+        if (textToDisplay.isNotEmpty && double.tryParse(textToDisplay) != null) {
+          firstNum = int.parse(textToDisplay);
+          operation = buttonText;
+          textToDisplay = ''; // Clear display to prepare for second number
+        }
+      } else {
+        // Add number or decimal to the display
+        textToDisplay += buttonText;
+      }
+    });
   }
 
   void clearScreen() {
