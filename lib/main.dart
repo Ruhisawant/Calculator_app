@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const CalculatorApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CalculatorApp extends StatelessWidget {
+  const CalculatorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +32,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String textToDisplay = '';
 
+  // Button configuration with labels and colors
   List<Map<String, dynamic>> buttons = [
     {'name': '1', 'color': Colors.brown},
     {'name': '2', 'color': Colors.brown},
@@ -47,29 +48,30 @@ class _MyHomePageState extends State<MyHomePage> {
     {'name': '*', 'color': Colors.orange},
     {'name': '.', 'color': Colors.brown},
     {'name': '0', 'color': Colors.brown},
-    {'name': '=', 'color': Colors.brown},
+    {'name': '=', 'color': Colors.green},
     {'name': '/', 'color': Colors.orange},
   ];
 
+  // Function to evaluate mathematical expressions
   String calculate(String expression) {
-  try {
-    if (expression.contains('/0')) {
+    try {
+      if (expression.contains('/0')) {
+        return 'Error';
+      }
+      Parser p = Parser();
+      Expression exp = p.parse(expression);
+      ContextModel cm = ContextModel();
+      double eval = exp.evaluate(EvaluationType.REAL, cm);
+      if (eval.isInfinite || eval.isNaN) {
+        return 'Error';
+      }
+      return eval.toString();
+    } catch (e) {
       return 'Error';
     }
-    Parser p = Parser();
-    Expression exp = p.parse(expression);
-    ContextModel cm = ContextModel();
-    double eval = exp.evaluate(EvaluationType.REAL, cm);
-    if (eval.isInfinite || eval.isNaN) {
-      return 'Error';
-    }
-    return eval.toString();
-  } catch (e) {
-    return 'Error';
   }
-}
 
-
+  // Handles button click events
   void buttonClick(String buttonText) {
     setState(() {
       if (buttonText == 'C') {
@@ -83,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // Clears the screen
   void clearScreen() {
     setState(() {
       textToDisplay = '';
@@ -102,11 +105,13 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Display for current input or result
               Text(
                 textToDisplay.isEmpty ? 'Press a button' : textToDisplay,
                 style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
+              // Grid of calculator buttons
               SizedBox(
                 width: 500,
                 height: 500,
@@ -142,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Clear button
               InkWell(
                 onTap: clearScreen,
                 child: Container(
